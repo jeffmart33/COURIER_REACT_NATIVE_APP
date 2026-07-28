@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "817120149106",
+    "project_id": "hooks-courier",
+    "storage_bucket": "hooks-courier.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817120149106:android:e6edd684f0b93d27cf8ceb",
+        "android_client_info": {
+          "package_name": "com.hooksfood.courier"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5OpxwpQ71_NZ5PRwHhVrx5YwqhXyXBUc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
