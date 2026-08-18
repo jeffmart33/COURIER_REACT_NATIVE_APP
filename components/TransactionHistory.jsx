@@ -23,7 +23,9 @@ function TransactionHistory({
         </Text>
 
         <Text style={styles.date}>
-          {new Date(item.date).toLocaleDateString()}
+          {new Date(
+  item.createdAt || item.date
+).toLocaleDateString()}
         </Text>
 
       </View>

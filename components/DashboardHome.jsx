@@ -11,6 +11,7 @@ import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import * as Location from "expo-location";
+import * as Notifications from "expo-notifications";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import API from "../services/api";
@@ -36,6 +37,7 @@ function DashboardHome({
   onlineLoading,
     loadDashboardData,
       activeOrder,
+        orderStage,
 }) {
   
 
@@ -65,45 +67,132 @@ const displayCity = online
   : "--";
 
   const handleToggleOnline = async () => {
-  if (onlineLoading) return;
+    if (onlineLoading) return;
 
-  try {
-    setOnlineLoading(true);
+    try {
+      setOnlineLoading(true);
 
-    const token = await AsyncStorage.getItem("courierToken");
+      const token =
+        await AsyncStorage.getItem("courierToken");
 
-    const newStatus = !online;
+      const newStatus = !online;
 
-    if (newStatus) {
+      /*
+       * ==============================
+       * GOING ONLINE
+       * ==============================
+       */
 
-      const { status } =
-        await Location.requestForegroundPermissionsAsync();
+      if (newStatus) {
 
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Required",
-          "Location permission is required."
-        );
-        return;
-      }
+        // ==============================
+        // LOCATION PERMISSION
+        // ==============================
 
-      const current =
-        await Location.getCurrentPositionAsync({
+        const {
+          status: locationStatus,
+        } =
+          await Location.requestForegroundPermissionsAsync();
+
+        if (locationStatus !== "granted") {
+
+          Alert.alert(
+            "Location Permission Required",
+            "HOOKS FOOD needs your location to show your position on the delivery map and send you delivery requests.",
+            [
+              {
+                text: "OK",
+              },
+            ]
+          );
+
+          return;
+        }
+
+
+        // ==============================
+        // NOTIFICATION PERMISSION
+        // ==============================
+
+        const {
+          status: notificationStatus,
+        } =
+          await Notifications.requestPermissionsAsync();
+
+        if (notificationStatus !== "granted") {
+
+          Alert.alert(
+            "Notification Permission Required",
+            "Please allow notifications so you can receive new delivery requests and important order updates."
+          );
+
+          return;
+        }
+
+
+        // ==============================
+        // GET CURRENT LOCATION
+        // ==============================
+
+        const current =
+          await Location.getCurrentPositionAsync({
+            accuracy:
+              Location.Accuracy.High,
+          });
+
+        const lat =
+          current.coords.latitude;
+
+        const lng =
+          current.coords.longitude;
+
+
+        // ==============================
+        // UPDATE LOCAL LOCATION
+        // ==============================
+
+        setLocation({
+          lat,
+          lng,
+          speed:
+            current.coords.speed || 0,
           accuracy:
-            Location.Accuracy.High,
+            current.coords.accuracy || 0,
+          heading:
+            current.coords.heading || 0,
         });
 
-      const lat = current.coords.latitude;
-      const lng = current.coords.longitude;
 
-      setLocation({
-        lat,
-        lng,
-      });
+        // ==============================
+        // SAVE LOCATION TO BACKEND
+        // ==============================
+
+        await API.put(
+          "/api/profile/location",
+          {
+            lat,
+            lng,
+          },
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+
+      }
+
+
+      // ==============================
+      // UPDATE ONLINE STATUS
+      // ==============================
 
       await API.put(
-        "/api/profile/location",
-        { lat, lng },
+        "/api/profile/online",
+        {
+          online: newStatus,
+        },
         {
           headers: {
             Authorization:
@@ -111,36 +200,34 @@ const displayCity = online
           },
         }
       );
+
+
+      // ==============================
+      // UPDATE UI
+      // ==============================
+
+      setOnline(newStatus);
+
+
+    } catch (err) {
+
+      console.log(
+        "Go Online Error:",
+        err?.response?.data || err
+      );
+
+      Alert.alert(
+        "Unable to Go Online",
+        err?.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+
+    } finally {
+
+      setOnlineLoading(false);
+
     }
-
-    await API.put(
-      "/api/profile/online",
-      {
-        online: newStatus,
-      },
-      {
-        headers: {
-          Authorization:
-            `Bearer ${token}`,
-        },
-      }
-    );
-
-    setOnline(newStatus);
-
-  } catch (err) {
-
-    Alert.alert(
-      "Error",
-      "Unable to update your location."
-    );
-
-  } finally {
-
-    setOnlineLoading(false);
-
-  }
-};
+  };
 
 
   return (
@@ -495,6 +582,7 @@ alignItems:"center"
   online={online}
   router={router}
   activeOrder={activeOrder}
+  orderStage={orderStage}
 />
 
     </View>

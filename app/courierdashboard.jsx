@@ -149,20 +149,14 @@ export default function CourierDashboard() {
   }, [incomingOrders]);
 
   
-    
-      
-
 
   useLocationTracking({
   online,
   setLocation,
-}); 
-
-
-
-  
-
-  
+  activeOrder,
+  orderStage,
+  setOrderStage,
+});
 
   
   /* ================= ORDER TIMER ================= */
@@ -309,11 +303,6 @@ useEffect(() => {
 }, []);
 
 
-
-
-
-
-
 /* ================= SCREEN RENDER ================= */
 
 const renderContent = () => {
@@ -404,7 +393,9 @@ case "History":
           incomingOrders={incomingOrders}
           weeklyEarnings={weeklyEarnings}
           activeOrder={activeOrder}
+          orderStage={orderStage}
             loadDashboardData={loadDashboardData}
+            
         
         />
       );

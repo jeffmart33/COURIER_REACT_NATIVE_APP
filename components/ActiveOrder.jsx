@@ -1,17 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
+import { useRouter } from "expo-router";
 
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
+  ScrollView,
 } from "react-native";
+
+import NavigationAppModal from "./NavigationAppModal";
 
 function ActiveOrder({
   order,
   stage,
   onNext,
 }) {
+
+  console.log("ORDER OBJECT");
+  console.log(JSON.stringify(order, null, 2));
+
+
+  const [showNavigationModal, setShowNavigationModal] = useState(false);
+  const router = useRouter();
+
 if (!order) {
   return (
     <View style={styles.empty}>
@@ -64,8 +76,11 @@ if (!order) {
     "Delivered",
   ];
 
-  return (
-    <View>
+return (
+    <ScrollView
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
 
       <Text style={styles.title}>
         Active Delivery
@@ -104,6 +119,60 @@ if (!order) {
           {order.dropoffAddress}
         </Text>
 
+<View
+  style={{
+    flexDirection: "row",
+    marginTop: 15,
+    gap: 10,
+  }}
+>
+
+  <TouchableOpacity
+    style={[
+      styles.navigateButton,
+      { flex: 1 },
+    ]}
+    onPress={() =>
+      router.push({
+        pathname: "/CourierNavigation",
+        params: {
+  orderId: order.id,
+  stage,
+
+  restaurantName: order.restaurantName,
+  pickupAddress: order.pickupAddress,
+  dropoffAddress: order.dropoffAddress,
+
+  pickupLat: order.pickupLocation.coordinates[1],
+  pickupLng: order.pickupLocation.coordinates[0],
+
+  dropoffLat: order.dropoffLocation.coordinates[1],
+  dropoffLng: order.dropoffLocation.coordinates[0],
+},
+      })
+    }
+  >
+    <Text style={styles.navigateButtonText}>
+      📍 In-App Navigation
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={[
+      styles.navigateButton,
+      {
+        flex: 1,
+        backgroundColor: "#2563eb",
+      },
+    ]}
+    onPress={() => setShowNavigationModal(true)}
+  >
+    <Text style={styles.navigateButtonText}>
+      🌍 Google Maps
+    </Text>
+  </TouchableOpacity>
+
+</View>
         <Text>
           💳 Payment:
           {" "}
@@ -173,14 +242,23 @@ if (!order) {
           </Text>
 
         )}
-
+<NavigationAppModal
+  visible={showNavigationModal}
+  onClose={() => setShowNavigationModal(false)}
+  destination={order.dropoffAddress}
+/>
       </View>
 
-    </View>
+    </ScrollView>
+    
   );
 }
 
 const styles = StyleSheet.create({
+
+    contentContainer: {
+    paddingBottom: 140,
+  },
 
   title:{
     fontSize:24,
@@ -295,6 +373,20 @@ tipItem: {
   color: "#374151",
   marginBottom: 10,
   lineHeight: 22,
+},
+
+navigateButton: {
+  backgroundColor: "#f97316",
+  marginTop: 15,
+  paddingVertical: 12,
+  borderRadius: 12,
+  alignItems: "center",
+},
+
+navigateButtonText: {
+  color: "#fff",
+  fontWeight: "700",
+  fontSize: 16,
 },
 
 });

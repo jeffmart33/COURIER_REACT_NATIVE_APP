@@ -96,14 +96,15 @@ export default function useDashboardData({
         activeOrderRes.data._id
       ) {
 
-        const stageMap = {
-          accepted: "Assigned",
-          heading_to_restaurant: "Heading to Restaurant",
-          arrived_restaurant: "Arrived at Restaurant",
-          picked_up: "Picked Up",
-          on_the_way: "Arrived at Customer Address",
-          delivered: "Delivered",
-        };
+const stageMap = {
+  accepted: "Assigned",
+  heading_to_restaurant: "Heading to Restaurant",
+  arrived_restaurant: "Arrived at Restaurant",
+  picked_up: "Picked Up",
+  on_the_way: "On the Way",
+  arrived_customer: "Arrived at Customer Address",
+  delivered: "Delivered",
+};
 
         setActiveOrder(activeOrderRes.data);
 
