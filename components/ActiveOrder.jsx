@@ -17,9 +17,6 @@ function ActiveOrder({
   onNext,
 }) {
 
-  console.log("ORDER OBJECT");
-  console.log(JSON.stringify(order, null, 2));
-
 
   const [showNavigationModal, setShowNavigationModal] = useState(false);
   const router = useRouter();
@@ -72,9 +69,20 @@ if (!order) {
     "Heading to Restaurant",
     "Arrived at Restaurant",
     "Picked Up",
+    "On the Way",
     "Arrived at Customer Address",
     "Delivered",
   ];
+
+  const stageIndex = stages.indexOf(stage);
+
+  const customerVisible =
+    stageIndex >= stages.indexOf("Arrived at Restaurant");
+
+  const beforePickup =
+    stageIndex < stages.indexOf("Picked Up");
+
+  const currency = order.currency === "EUR" ? "€" : "₦";
 
 return (
     <ScrollView
@@ -93,16 +101,13 @@ return (
         </Text>
 
         <Text>
-          📦 Order ID: {order.id}
+          📦 Order: {order.externalReference || order.orderNumber}
         </Text>
 
         <Text>
           👤 Customer: {
-            stage === "Arrived at Restaurant" ||
-            stage === "Picked Up" ||
-            stage === "On the Way" ||
-            stage === "Delivered"
-              ? order.customerName
+            customerVisible
+              ? `${order.customerName}${order.customerPhone ? ` · ${order.customerPhone}` : ""}`
               : "🔒 Hidden"
           }
         </Text>
@@ -136,7 +141,7 @@ return (
       router.push({
         pathname: "/CourierNavigation",
         params: {
-  orderId: order.id,
+  orderId: order._id,
   stage,
 
   restaurantName: order.restaurantName,
@@ -173,20 +178,37 @@ return (
   </TouchableOpacity>
 
 </View>
-        <Text>
-          💳 Payment:
-          {" "}
-          {order.payment}
-        </Text>
+        {order.dropoffInstructions ? (
+          <Text>
+            📝 Note: {order.dropoffInstructions}
+          </Text>
+        ) : null}
 
-        <Text>
-          🛣 Distance:
-          {" "}
-          {order.distance}
-        </Text>
+        {order.metadata?.payment_method ? (
+          <Text>
+            💳 Payment:
+            {" "}
+            {String(order.metadata.payment_method).replace(/_/g, " ")}
+          </Text>
+        ) : null}
+
+        {order.items?.length > 0 && (
+          <View style={styles.items}>
+            <Text style={styles.itemsTitle}>
+              🧾 Items to collect
+            </Text>
+
+            {order.items.map((item, index) => (
+              <Text key={`${item.name}-${index}`}>
+                {item.quantity}× {item.name}
+                {item.note ? ` (${item.note})` : ""}
+              </Text>
+            ))}
+          </View>
+        )}
 
         <Text style={styles.fee}>
-          💰 €{order.fee}
+          💰 {currency}{Number(order.fee || 0).toLocaleString()}
         </Text>
 
       </View>
@@ -203,14 +225,14 @@ return (
             key={item}
             style={[
               styles.stage,
-              index <= stages.indexOf(stage)
+              index <= stageIndex
                 && styles.completed,
             ]}
           >
 
             <Text
               style={
-                index <= stages.indexOf(stage)
+                index <= stageIndex
                   ? styles.completedText
                   : null
               }
@@ -230,7 +252,7 @@ return (
           >
 
             <Text style={styles.buttonText}>
-              Next Step →
+              {NEXT_ACTION[stage] || "Next Step →"}
             </Text>
 
           </TouchableOpacity>
@@ -245,7 +267,7 @@ return (
 <NavigationAppModal
   visible={showNavigationModal}
   onClose={() => setShowNavigationModal(false)}
-  destination={order.dropoffAddress}
+  destination={beforePickup ? order.pickupAddress : order.dropoffAddress}
 />
       </View>
 
@@ -254,7 +276,29 @@ return (
   );
 }
 
+const NEXT_ACTION = {
+  Assigned: "Start to pickup",
+  "Heading to Restaurant": "I have arrived at pickup",
+  "Arrived at Restaurant": "Confirm pickup",
+  "Picked Up": "Start delivery",
+  "On the Way": "I have arrived at customer",
+  "Arrived at Customer Address": "Confirm delivery",
+};
+
 const styles = StyleSheet.create({
+
+  items:{
+    marginTop:10,
+    padding:10,
+    borderRadius:10,
+    backgroundColor:"#f9fafb",
+  },
+
+  itemsTitle:{
+    fontWeight:"700",
+    marginBottom:4,
+  },
+
 
     contentContainer: {
     paddingBottom: 140,

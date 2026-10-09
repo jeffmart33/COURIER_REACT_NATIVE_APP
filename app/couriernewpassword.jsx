@@ -16,7 +16,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import API from "../services/api";
 
 export default function CourierNewPassword() {
-  const { email } = useLocalSearchParams();
+  const { email, code } = useLocalSearchParams();
 
   const [password, setPassword] = useState("");
 
@@ -50,6 +50,7 @@ export default function CourierNewPassword() {
         "/api/auth/reset-password",
         {
           email,
+          code,
           password,
         }
       );

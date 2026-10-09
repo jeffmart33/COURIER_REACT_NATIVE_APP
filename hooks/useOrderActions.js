@@ -66,11 +66,11 @@ const flow = [
 
 const statusMap = {
   Assigned: "accepted",
-  "Heading to Restaurant": "heading_to_restaurant",
-  "Arrived at Restaurant": "arrived_restaurant",
+  "Heading to Restaurant": "en_route_to_pickup",
+  "Arrived at Restaurant": "arrived_pickup",
   "Picked Up": "picked_up",
-  "On the Way": "on_the_way",
-  "Arrived at Customer Address": "arrived_customer",
+  "On the Way": "in_transit",
+  "Arrived at Customer Address": "arrived_delivery",
   Delivered: "delivered",
 };
 
@@ -210,6 +210,24 @@ const statusMap = {
         "courierToken"
       );
 
+    if (
+      typeof location?.lat === "number" &&
+      typeof location?.lng === "number"
+    ) {
+      await API.put(
+        "/api/courier/location",
+        {
+          lat: location.lat,
+          lng: location.lng,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      ).catch(() => null);
+    }
+
     const response = await API.put(
       `/api/orders/${activeOrder._id}/status`,
       {
@@ -279,6 +297,14 @@ const statusMap = {
       );
 
     } catch (error) {
+
+      if (error.response?.status === 409) {
+        setIncomingOrders((prev) =>
+          prev.filter(
+            (o) => o._id !== order._id
+          )
+        );
+      }
 
       Alert.alert(
         "Error",

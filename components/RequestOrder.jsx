@@ -8,10 +8,25 @@ import {
   StyleSheet,
 } from "react-native";
 
+const formatDistance = (meters) => {
+  if (meters === null || meters === undefined) return "-";
+
+  return meters >= 1000
+    ? `${(meters / 1000).toFixed(1)} km`
+    : `${Math.round(meters)} m`;
+};
+
+const formatMinutes = (seconds) =>
+  seconds ? `${Math.max(1, Math.round(seconds / 60))} min` : "-";
+
+const formatFee = (order) =>
+  `${order.currency === "EUR" ? "€" : "₦"}${Number(order.fee || 0).toLocaleString()}`;
+
 function RequestOrder({
   orders,
   acceptOrder,
   rejectOrder,
+  secondsLeft = 0,
 }) {
 
   if (!orders?.length) {
@@ -63,7 +78,7 @@ function RequestOrder({
       showsVerticalScrollIndicator={false}
     >
 
-      {orders.map((order) => (
+      {orders.map((order, index) => (
 
         <View
           key={order._id}
@@ -73,6 +88,13 @@ function RequestOrder({
           <View style={styles.header}>
             <Text style={styles.headerText}>
               📦 New Delivery Request
+            </Text>
+
+            <Text style={styles.headerSub}>
+              Order {order.externalReference || order.orderNumber}
+              {index === 0 && secondsLeft > 0
+                ? ` · ${secondsLeft}s to answer`
+                : ""}
             </Text>
           </View>
 
@@ -110,8 +132,50 @@ function RequestOrder({
               {order.dropoffAddress}
             </Text>
 
+            {order.offer && (
+              <View style={styles.stats}>
+                <View style={styles.stat}>
+                  <Text style={styles.statLabel}>To pickup</Text>
+                  <Text style={styles.statValue}>
+                    {formatDistance(order.offer.distanceToPickupM)}
+                  </Text>
+                </View>
+
+                <View style={styles.stat}>
+                  <Text style={styles.statLabel}>Trip</Text>
+                  <Text style={styles.statValue}>
+                    {formatDistance(order.offer.tripDistanceM)}
+                  </Text>
+                </View>
+
+                <View style={styles.stat}>
+                  <Text style={styles.statLabel}>Est. delivery</Text>
+                  <Text style={styles.statValue}>
+                    {formatMinutes(
+                      (order.offer.etaToPickupSeconds || 0) +
+                        (order.offer.tripEtaSeconds || 0)
+                    )}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {order.items?.length > 0 && (
+              <>
+                <Text>
+                  Items:
+                </Text>
+
+                <Text style={styles.bold}>
+                  {order.items
+                    .map((item) => `${item.quantity}× ${item.name}`)
+                    .join(", ")}
+                </Text>
+              </>
+            )}
+
             <Text style={styles.fee}>
-              €{order.fee}
+              {formatFee(order)}
             </Text>
 
             <View style={styles.buttons}>
@@ -226,8 +290,39 @@ tipItem:{
     fontSize:18,
   },
 
+  headerSub:{
+    color:"#dcfce7",
+    marginTop:4,
+    fontSize:13,
+  },
+
   body:{
     padding:20,
+  },
+
+  stats:{
+    flexDirection:"row",
+    justifyContent:"space-between",
+    marginBottom:12,
+  },
+
+  stat:{
+    flex:1,
+    backgroundColor:"#f3f4f6",
+    borderRadius:10,
+    padding:8,
+    marginRight:6,
+  },
+
+  statLabel:{
+    color:"#6b7280",
+    fontSize:11,
+  },
+
+  statValue:{
+    fontWeight:"700",
+    fontSize:14,
+    marginTop:2,
   },
 
   bold:{

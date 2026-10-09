@@ -97,6 +97,11 @@ const handleVerify = async () => {
       )
     );
 
+    await AsyncStorage.setItem(
+      "courierId",
+      String(response.data.courier?.id || "")
+    );
+
     Alert.alert(
       "Success",
       response.data.message

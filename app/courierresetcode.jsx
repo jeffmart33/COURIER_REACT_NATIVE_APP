@@ -47,7 +47,7 @@ export default function CourierResetCode() {
 
       router.push({
         pathname: "/couriernewpassword",
-        params: { email },
+        params: { email, code },
       });
 
     } catch (error) {

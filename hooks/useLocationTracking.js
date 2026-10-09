@@ -54,9 +54,14 @@ export default function useLocationTracking({
 
   const arrivalUpdatingRef = useRef(false);
 
-  
+  const hasActiveOrder = Boolean(activeOrder);
+
   useEffect(() => {
-    if (!online) return;
+    arrivalUpdatingRef.current = false;
+  }, [orderStage, activeOrder?._id]);
+
+  useEffect(() => {
+    if (!online && !hasActiveOrder) return;
 
     let locationSubscription = null;
 
@@ -74,8 +79,8 @@ export default function useLocationTracking({
           await Location.watchPositionAsync(
             {
               accuracy: Location.Accuracy.High,
-              timeInterval: 5000,
-              distanceInterval: 10,
+              timeInterval: 15000,
+              distanceInterval: 30,
             },
             async (position) => {
               const {
@@ -96,6 +101,33 @@ setLocation({
   altitude: altitude ?? 0,
   timestamp: Date.now(),
 });
+
+              try {
+                const token =
+                  await AsyncStorage.getItem(
+                    "courierToken"
+                  );
+
+               await API.put(
+  "/api/courier/location",
+  {
+    lat: latitude,
+    lng: longitude,
+    heading: heading ?? 0,
+    speed: speed ?? 0,
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
+              } catch (error) {
+                console.log(
+                  "Location update failed",
+                  error
+                );
+              }
 
 /* ================= AUTOMATIC ARRIVAL DETECTION ================= */
 
@@ -127,7 +159,7 @@ if (activeOrder) {
     };
 
     nextStage = "Arrived at Restaurant";
-    nextStatus = "arrived_restaurant";
+    nextStatus = "arrived_pickup";
   }
 
   /*
@@ -152,7 +184,7 @@ if (
     };
 
     nextStage = "Arrived at Customer Address";
-nextStatus = "arrived_customer";
+nextStatus = "arrived_delivery";
   }
 
   if (
@@ -224,32 +256,6 @@ nextStatus = "arrived_customer";
   }
 }
 
-              try {
-                const token =
-                  await AsyncStorage.getItem(
-                    "courierToken"
-                  );
-
-               await API.put(
-  "/api/courier/location",
-  {
-    lat: latitude,
-    lng: longitude,
-    heading: heading ?? 0,
-    speed: speed ?? 0,
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
-              } catch (error) {
-                console.log(
-                  "Location update failed",
-                  error
-                );
-              }
             }
           );
       } catch (error) {
@@ -267,6 +273,7 @@ nextStatus = "arrived_customer";
     };
   }, [
   online,
+  hasActiveOrder,
   activeOrder,
   orderStage,
   setOrderStage,

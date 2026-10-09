@@ -162,7 +162,11 @@ export default function CourierDashboard() {
   /* ================= ORDER TIMER ================= */
 
   useEffect(() => {
-    if (!incomingOrder?.expiresAt) {
+    const expiresAt =
+      incomingOrder?.offer?.expiresAt ||
+      incomingOrder?.expiresAt;
+
+    if (!expiresAt) {
       setOrderTimer(0);
       return;
     }
@@ -171,7 +175,7 @@ export default function CourierDashboard() {
       const remaining = Math.max(
         0,
         Math.floor(
-          (new Date(incomingOrder.expiresAt) - new Date()) /
+          (new Date(expiresAt) - new Date()) /
             1000
         )
       );
@@ -198,6 +202,7 @@ export default function CourierDashboard() {
 
   useOrderSocket({
   online,
+  activeOrder,
   setIncomingOrders,
   setActiveOrder,
   setOrderStage,
@@ -314,6 +319,7 @@ const renderContent = () => {
           orders={incomingOrders}
           acceptOrder={acceptOrder}
           rejectOrder={rejectOrder}
+          secondsLeft={orderTimer}
         />
       );
 

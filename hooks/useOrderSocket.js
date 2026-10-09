@@ -1,16 +1,25 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
-import socket from "../services/socket";
+import socket, { connectSocket } from "../services/socket";
+
+const sameId = (a, b) => String(a) === String(b);
 
 export default function useOrderSocket({
   online,
+  activeOrder,
   setIncomingOrders,
   setActiveOrder,
   setOrderStage,
   setActiveTab,
 }) {
-  /* ================= REGISTER COURIER ================= */
+  const activeOrderRef = useRef(activeOrder);
+
+  useEffect(() => {
+    activeOrderRef.current = activeOrder;
+  }, [activeOrder]);
+
+  /* ================= CONNECT AND REGISTER ================= */
 
   useEffect(() => {
     const registerCourier = async () => {
@@ -24,6 +33,8 @@ export default function useOrderSocket({
         );
       }
     };
+
+    connectSocket();
 
     if (socket.connected) {
       registerCourier();
@@ -40,14 +51,18 @@ export default function useOrderSocket({
 
   useEffect(() => {
     const handleNewOrder = (order) => {
-      if (!online) return;
+      if (!online && !order?.offer?.assignmentId) return;
 
       setIncomingOrders((prev) => {
         const exists = prev.some(
-          (o) => o._id === order._id
+          (o) => sameId(o._id, order._id)
         );
 
-        if (exists) return prev;
+        if (exists) {
+          return prev.map((o) =>
+            sameId(o._id, order._id) ? order : o
+          );
+        }
 
         return [order, ...prev];
       });
@@ -60,55 +75,81 @@ export default function useOrderSocket({
     };
   }, [online]);
 
-  /* ================= ORDER ACCEPTED ================= */
+  /* ================= OFFER GONE ================= */
 
   useEffect(() => {
-    const handleAccepted = (orderId) => {
+    const removeOffer = (data) => {
+      const orderId =
+        typeof data === "object" && data !== null
+          ? data.orderId
+          : data;
+
       setIncomingOrders((prev) =>
         prev.filter(
-          (o) => o._id !== orderId
+          (o) => !sameId(o._id, orderId)
         )
       );
     };
 
-    socket.on(
-      "order-accepted",
-      handleAccepted
-    );
+    socket.on("order-accepted", removeOffer);
+    socket.on("offer-withdrawn", removeOffer);
+    socket.on("offer-expired", removeOffer);
 
     return () => {
-      socket.off(
-        "order-accepted",
-        handleAccepted
-      );
+      socket.off("order-accepted", removeOffer);
+      socket.off("offer-withdrawn", removeOffer);
+      socket.off("offer-expired", removeOffer);
     };
   }, []);
 
-  /* ================= ORDER CANCELLED ================= */
+  /* ================= ORDER CANCELLED OR CHANGED ================= */
 
   useEffect(() => {
-    const handleCancelled = () => {
+    const handleCancelled = (data) => {
+      const orderId = data?.orderId;
+
+      setIncomingOrders((prev) =>
+        prev.filter(
+          (o) => !sameId(o._id, orderId)
+        )
+      );
+
+      const current = activeOrderRef.current;
+
+      if (!current || (orderId && !sameId(current._id, orderId))) {
+        return;
+      }
+
+      const reassigned = data?.reason === "reassigned";
+
       Alert.alert(
-        "Order Cancelled",
-        "This order has been cancelled by the customer."
+        reassigned
+          ? "Delivery Reassigned"
+          : "Order Cancelled",
+        reassigned
+          ? "This delivery was moved to another courier."
+          : `This delivery was cancelled.${data?.reason ? ` Reason: ${data.reason}` : ""}`
       );
 
       setActiveOrder(null);
-      setIncomingOrders([]);
       setOrderStage("Assigned");
       setActiveTab("Home");
     };
 
-    socket.on(
-      "order-cancelled",
-      handleCancelled
-    );
+    const handleUpdated = (order) => {
+      setActiveOrder((current) =>
+        current && sameId(current._id, order?._id)
+          ? order
+          : current
+      );
+    };
+
+    socket.on("order-cancelled", handleCancelled);
+    socket.on("delivery-updated", handleUpdated);
 
     return () => {
-      socket.off(
-        "order-cancelled",
-        handleCancelled
-      );
+      socket.off("order-cancelled", handleCancelled);
+      socket.off("delivery-updated", handleUpdated);
     };
   }, []);
 }
