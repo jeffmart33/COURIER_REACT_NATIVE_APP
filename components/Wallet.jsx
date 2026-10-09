@@ -48,6 +48,14 @@ function Wallet({
           backgroundColor="#16a34a"
         />
 
+        {Number(wallet?.paidByPlatform) > 0 && (
+          <WalletCard
+            title="Paid by Hooks to your bank"
+            amount={wallet?.paidByPlatform || 0}
+            backgroundColor="#2563eb"
+          />
+        )}
+
         <WalletCard
           title="Pending Earnings"
           amount={wallet?.pending || 0}
