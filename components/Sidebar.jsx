@@ -43,6 +43,7 @@ function Sidebar({
           "History",
           "Profile",
           "Referral",
+          "Campaigns",
         ].map((tab) => (
 
           <TouchableOpacity
@@ -65,6 +66,7 @@ function Sidebar({
                 {tab === "History" && "📜"}
                 {tab === "Profile" && "👤"}
                 {tab === "Referral" && "🎁"}
+                {tab === "Campaigns" && "🏆"}
               </Text>
 
               {tab === "Requests" &&

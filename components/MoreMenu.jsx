@@ -72,6 +72,16 @@ function MoreMenu({
           </TouchableOpacity>
 
           <TouchableOpacity
+            style={styles.item}
+            onPress={() => {
+              setActiveTab("Campaigns");
+              onClose();
+            }}
+          >
+            <Text>🏆 Campaigns</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={styles.logout}
             onPress={() => {
               onClose();

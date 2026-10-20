@@ -35,6 +35,7 @@ import useWallet from "../hooks/useWallet";
 import ProfileScreen from "../components/ProfileScreen";
 import useLocationTracking from "../hooks/useLocationTracking";
 import Referral from "../components/Referral";
+import Campaigns from "../components/Campaigns";
 import EditProfileModal from "../components/EditProfileModal";
 
 import Sidebar from "../components/Sidebar";
@@ -380,6 +381,9 @@ case "History":
           profileData={profileData}
         />
       );
+
+    case "Campaigns":
+      return <Campaigns />;
 
     default:
       return (
