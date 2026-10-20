@@ -3,17 +3,16 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
   KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 
 import { router, useLocalSearchParams } from "expo-router";
 
 import API from "../services/api";
+import PasswordInput from "../components/PasswordInput";
 
 export default function CourierNewPassword() {
   const { email, code } = useLocalSearchParams();
@@ -74,11 +73,7 @@ export default function CourierNewPassword() {
     return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={
-        Platform.OS === "ios"
-          ? "padding"
-          : undefined
-      }
+      behavior="padding"
     >
       <View style={styles.container}>
 
@@ -96,11 +91,10 @@ export default function CourierNewPassword() {
             Create a strong password to secure your account
           </Text>
 
-          <TextInput
+          <PasswordInput
             style={styles.input}
             placeholder="Enter new password"
             placeholderTextColor="#999"
-            secureTextEntry
             value={password}
             onChangeText={(text) => {
               setPassword(text);
@@ -108,14 +102,13 @@ export default function CourierNewPassword() {
             }}
           />
 
-          <TextInput
+          <PasswordInput
             style={[
               styles.input,
               { marginTop: 15 },
             ]}
             placeholder="Confirm new password"
             placeholderTextColor="#999"
-            secureTextEntry
             value={confirmPassword}
             onChangeText={(text) => {
               setConfirmPassword(text);

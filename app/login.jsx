@@ -21,6 +21,7 @@ import {
   registerForPushNotifications,
 } from "../services/notifications";
 import courierVideo from "../assets/images/couriervid.mp4";
+import PasswordInput from "../components/PasswordInput";
 
 export default function Login() {
 const [email, setEmail] = useState("");
@@ -139,12 +140,11 @@ router.replace("/courierdashboard");
   style={styles.input}
 />
 
-        <TextInput
+        <PasswordInput
   placeholder="••••••••"
   placeholderTextColor="#6b7280"
   value={password}
   onChangeText={setPassword}
-  secureTextEntry
   style={styles.input}
 />
 

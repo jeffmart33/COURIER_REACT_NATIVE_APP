@@ -9,7 +9,6 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 
 import * as ImagePicker from "expo-image-picker";
@@ -17,6 +16,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { router } from "expo-router";
 
 import API from "../services/api";
+import PasswordInput from "../components/PasswordInput";
 import logo from "../assets/images/courierlog.png";
 
 export default function CourierCreateAccount() {
@@ -190,10 +190,11 @@ export default function CourierCreateAccount() {
 return (
   <KeyboardAvoidingView
     style={{ flex: 1 }}
-    behavior={Platform.OS === "ios" ? "padding" : undefined}
+    behavior="padding"
   >
     <ScrollView
       style={styles.container}
+      keyboardShouldPersistTaps="handled"
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
@@ -382,10 +383,9 @@ return (
         Password
       </Text>
 
-      <TextInput
+      <PasswordInput
         style={styles.input}
         placeholder="Minimum 8 characters"
-        secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
@@ -394,10 +394,9 @@ return (
         Confirm Password
       </Text>
 
-      <TextInput
+      <PasswordInput
         style={styles.input}
         placeholder="Re-enter Password"
-        secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
