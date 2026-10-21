@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 import socket, { connectSocket } from "../services/socket";
+import { alertNewOrder } from "../services/notifications";
 
 const sameId = (a, b) => String(a) === String(b);
 
@@ -14,6 +15,7 @@ export default function useOrderSocket({
   setActiveTab,
 }) {
   const activeOrderRef = useRef(activeOrder);
+  const alertedRef = useRef(new Set());
 
   useEffect(() => {
     activeOrderRef.current = activeOrder;
@@ -52,6 +54,13 @@ export default function useOrderSocket({
   useEffect(() => {
     const handleNewOrder = (order) => {
       if (!online && !order?.offer?.assignmentId) return;
+
+      const key = String(order?._id);
+
+      if (!alertedRef.current.has(key)) {
+        alertedRef.current.add(key);
+        alertNewOrder(order).catch(() => null);
+      }
 
       setIncomingOrders((prev) => {
         const exists = prev.some(

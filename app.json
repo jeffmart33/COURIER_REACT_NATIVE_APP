@@ -67,7 +67,12 @@
       ],
 
       "expo-video",
-      "expo-notifications"
+      [
+        "expo-notifications",
+        {
+          "sounds": ["./assets/sounds/new_order.wav"]
+        }
+      ]
     ],
 
     "experiments": {

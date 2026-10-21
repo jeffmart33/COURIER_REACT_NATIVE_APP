@@ -12,6 +12,40 @@ export const responseListener = {
   current: null,
 };
 
+export const ORDER_CHANNEL = "delivery-requests";
+
+export async function setupOrderChannel() {
+  await Notifications.setNotificationChannelAsync(ORDER_CHANNEL, {
+    name: "Delivery requests",
+    importance: Notifications.AndroidImportance.MAX,
+    sound: "new_order.wav",
+    vibrationPattern: [0, 600, 300, 600, 300, 600],
+    enableVibrate: true,
+    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+  });
+}
+
+export async function alertNewOrder(order) {
+  await setupOrderChannel();
+
+  const fee = `₦${Number(order?.fee || 0).toLocaleString("en-NG")}`;
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "New delivery request",
+      body: `${order?.restaurantName || "New order"}\nFee: ${fee}`,
+      sound: "new_order.wav",
+      data: {
+        orderId: String(order?._id || ""),
+        screen: "requests",
+      },
+    },
+    trigger: {
+      channelId: ORDER_CHANNEL,
+    },
+  });
+}
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -23,6 +57,8 @@ Notifications.setNotificationHandler({
 
 
 export async function registerForPushNotifications(token) {
+
+  await setupOrderChannel();
 
   if (Constants.appOwnership === "expo") {
     console.log("Running in Expo Go. Skipping push notifications.");
