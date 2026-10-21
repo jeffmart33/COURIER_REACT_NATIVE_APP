@@ -18,17 +18,11 @@ function Profile({
   handleLogout,
 }) {
 
-  const displayRating = online ? rating : 0;
+  const displayCompleted = completed || 0;
 
-  const displayCompleted = online ? completed : 0;
+  const displayCity = profileData?.city || "--";
 
-  const displayCity = online
-    ? profileData?.city || "--"
-    : "--";
-
-  const displayName = online
-    ? profileData?.fullName || "Courier Rider"
-    : "Offline";
+  const displayName = profileData?.fullName || "Courier";
 
   return (
     <View>
@@ -52,12 +46,6 @@ function Profile({
   </Text>
 
   <View style={styles.badgesRow}>
-
-    <View style={styles.badge}>
-      <Text style={styles.badgeText}>
-        ⭐ {displayRating} Rating
-      </Text>
-    </View>
 
     <View style={styles.badge}>
       <Text style={styles.badgeText}>
@@ -138,7 +126,7 @@ Vehicle Registration
       <View style={styles.infoCard}>
 
 <Text style={styles.label}>
-Government ID
+Government ID type
 </Text>
 
 <Text style={styles.value}>
@@ -172,29 +160,6 @@ Referral Code
 
 </View>
 
-<View style={styles.infoCard}>
-
-<Text style={styles.label}>
-Referral Balance
-</Text>
-
-<Text style={[styles.value,{color:"#16a34a"}]}>
-€{profileData?.referralBalance || 0}
-</Text>
-
-</View>
-
-<View style={styles.infoCard}>
-
-<Text style={styles.label}>
-Courier Level
-</Text>
-
-<Text style={styles.value}>
-Gold Rider 🏆
-</Text>
-
-</View>
 
       {/* Buttons */}
 

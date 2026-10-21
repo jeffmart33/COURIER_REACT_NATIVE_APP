@@ -22,7 +22,11 @@ export default function useCourierProfile({
           }
         );
 
-        setProfileData(data);
+        setProfileData({
+          ...data,
+          governmentId: data.governmentIdType || "",
+          address: data.homeAddress || "",
+        });
         setOnline(data.online ?? false);
         setRating(data.rating ?? 0);
         setCompletedOrders(data.completedOrders ?? 0);

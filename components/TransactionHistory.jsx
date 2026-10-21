@@ -5,6 +5,7 @@ import {
   FlatList,
   StyleSheet,
 } from "react-native";
+import { formatMoney } from "../utils/helpers";
 
 function TransactionHistory({
   transactions,
@@ -46,7 +47,7 @@ function TransactionHistory({
           {item.type === "withdrawal"
             ? "-"
             : "+"}
-          €{item.amount}
+          {formatMoney(item.amount)}
         </Text>
 
         <Text style={styles.status}>

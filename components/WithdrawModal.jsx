@@ -11,6 +11,7 @@ import {
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API from "../services/api";
+import { formatMoney } from "../utils/helpers";
 
 function WithdrawModal({
   visible,
@@ -70,7 +71,7 @@ Alert.alert(
           </Text>
 
           <Text>
-            Available: €{wallet.available}
+            Available: {formatMoney(wallet.available)}
           </Text>
 
           <Text>

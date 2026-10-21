@@ -10,6 +10,7 @@ import {
 
 import WalletCard from "./WalletCard";
 import BankModal from "./BankModal";
+import { formatMoney } from "../utils/helpers";
 
 function Wallet({
   wallet,
@@ -103,17 +104,17 @@ function Wallet({
 
         <View style={styles.row}>
           <Text>This Week</Text>
-          <Text>€{wallet?.weekly || 0}</Text>
+          <Text>{formatMoney(wallet?.weekly || 0)}</Text>
         </View>
 
         <View style={styles.row}>
           <Text>This Month</Text>
-          <Text>€{wallet?.monthly || 0}</Text>
+          <Text>{formatMoney(wallet?.monthly || 0)}</Text>
         </View>
 
         <View style={styles.row}>
           <Text>Total Earned</Text>
-          <Text>€{wallet?.totalEarned || 0}</Text>
+          <Text>{formatMoney(wallet?.totalEarned || 0)}</Text>
         </View>
 
       </View>

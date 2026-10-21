@@ -109,10 +109,6 @@ export default function CourierDashboard() {
 
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
-  const [surge, setSurge] = useState("1x");
-
-  const multipliers = ["1x", "2.4x", "2.3x", "3x"];
-
   const [transactions, setTransactions] = useState([]);
 
   const [weeklyEarnings, setWeeklyEarnings] = useState([
@@ -266,18 +262,6 @@ useWallet({
 
 
 
-/* ================= SURGE ================= */
-
-useEffect(() => {
-  if (!online) {
-    setSurge("1x");
-    return;
-  }
-
-  setSurge("2.4x");
-}, [online]);
-
-
 /* ================= PUSH NOTIFICATIONS ================= */
 useEffect(() => {
   const setupNotifications = async () => {
@@ -398,7 +382,6 @@ case "History":
           profileData={profileData}
           location={location}
           setLocation={setLocation}
-          surge={surge}
           router={router}
           incomingOrders={incomingOrders}
           weeklyEarnings={weeklyEarnings}

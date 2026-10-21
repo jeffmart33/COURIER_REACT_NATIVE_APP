@@ -1,6 +1,5 @@
 import React, {
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -10,14 +9,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   Text,
-  Animated,
 } from "react-native";
 
 import { Image } from "expo-image";
 
 import MapView, {
   Marker,
-  Circle,
   AnimatedRegion,
 } from "react-native-maps";
 
@@ -40,7 +37,6 @@ const GOOGLE_MAPS_API_KEY =
 export default function CourierMap({
   location,
   online,
-  surge,
   router,
   activeOrder,
     orderStage,
@@ -50,7 +46,6 @@ export default function CourierMap({
 
   const lastCameraLocation = useRef(null);
 
-  const pulse = useRef(new Animated.Value(1)).current;
 
   const animatedCoordinate = useRef(
     new AnimatedRegion({
@@ -61,7 +56,6 @@ export default function CourierMap({
     })
   ).current;
 
-  const [zones, setZones] = useState([]);
   const [routeInfo, setRouteInfo] = useState({
   distance: 0,
   duration: 0,
@@ -228,32 +222,6 @@ const loadNextTurn = async () => {
   }
 };
 
-  const nearestZone = useMemo(() => {
-
-    if (!location || zones.length === 0)
-      return null;
-
-    let nearest = null;
-
-    zones.forEach((zone) => {
-
-      const distance = Math.sqrt(
-        Math.pow(zone.lat - location.lat, 2) +
-        Math.pow(zone.lng - location.lng, 2)
-      );
-
-      if (!nearest || distance < nearest.distance) {
-        nearest = {
-          ...zone,
-          distance,
-        };
-      }
-
-    });
-
-    return nearest;
-
-  }, [zones, location]);
 
   useEffect(() => {
 
@@ -272,71 +240,7 @@ const loadNextTurn = async () => {
   routeKey,
 ]);
 
-  useEffect(() => {
 
-    Animated.loop(
-
-      Animated.sequence([
-
-        Animated.timing(
-          pulse,
-          {
-            toValue: 1.1,
-            duration: 700,
-            useNativeDriver: true,
-          }
-        ),
-
-        Animated.timing(
-          pulse,
-          {
-            toValue: 1,
-            duration: 700,
-            useNativeDriver: true,
-          }
-        ),
-
-      ])
-
-    ).start();
-
-  }, []);
-
-  useEffect(() => {
-
-    if (!online) {
-      setZones([]);
-      return;
-    }
-
-    loadZones();
-
-    const interval = setInterval(
-      loadZones,
-      15000
-    );
-
-    return () => clearInterval(interval);
-
-  }, [online, location]);
-
-  const loadZones = async () => {
-
-    try {
-
-      const res = await API.get(
-        `/api/surge?lat=${location.lat}&lng=${location.lng}`
-      );
-
-      setZones(res.data || []);
-
-    } catch (err) {
-
-      console.log("Failed loading surge zones", err);
-
-    }
-
-  };
 
 useEffect(() => {
 
@@ -622,83 +526,6 @@ onReady={(result) => {
 />
 )}
 
-{/* ================= SURGE ZONES ================= */}
-
-{zones.map((zone, index) => {
-
-  const nearest =
-    nearestZone &&
-    nearestZone.lat === zone.lat &&
-    nearestZone.lng === zone.lng;
-
- return (
-  <React.Fragment key={index}>
-
-    <Circle
-      center={{
-        latitude: zone.lat,
-        longitude: zone.lng,
-      }}
-      radius={zone.radius}
-      strokeWidth={2}
-      strokeColor={
-        nearest ? "#fb923c" : "#ef4444"
-      }
-      fillColor={
-        nearest
-          ? "rgba(251,146,60,0.35)"
-          : "rgba(239,68,68,0.22)"
-      }
-    />
-
-    <Marker
-      coordinate={{
-        latitude: zone.lat,
-        longitude: zone.lng,
-      }}
-      onPress={() => {
-
-        console.log("Pressed:", zone.multiplier);
-
-        router.push({
-          pathname: "/CourierEarnings",
-          params: {
-            multiplier: zone.multiplier,
-          },
-        });
-
-      }}
-    >
-
-      <View
-        style={{
-          backgroundColor: nearest
-            ? "#fb923c"
-            : "#ef4444",
-          paddingHorizontal: 10,
-          paddingVertical: 6,
-          borderRadius: 20,
-          borderWidth: 2,
-          borderColor: "#fff",
-        }}
-      >
-        <Text
-          style={{
-            color: "#fff",
-            fontWeight: "700",
-          }}
-        >
-          🔥 {zone.multiplier}
-        </Text>
-      </View>
-
-    </Marker>
-
-  </React.Fragment>
-);
-
-})}
-
 </MapView>
 
 {/* ================= NEXT TURN ================= */}
@@ -809,63 +636,6 @@ orderStage === "Arrived at Customer Address"
 
 )}
 
-{/* ================= SURGE BUTTON ================= */}
-
-<Animated.View
-
-  style={[
-
-    styles.surgeButton,
-
-    {
-
-      transform: [
-
-        {
-
-          scale: pulse,
-
-        },
-
-      ],
-
-    },
-
-  ]}
-
->
-
-  <TouchableOpacity
-
-    onPress={() =>
-
-      router.push({
-
-        pathname: "/CourierEarnings",
-
-        params: {
-
-          multiplier: online
-            ? surge
-            : "1x",
-
-        },
-
-      })
-
-    }
-
-  >
-
-    <Text style={styles.surgeText}>
-
-      🔥 {online ? surge : "1x"}
-
-    </Text>
-
-  </TouchableOpacity>
-
-</Animated.View>
 {/* ================= LOCATE BUTTON ================= */}
 
 <TouchableOpacity
@@ -907,32 +677,6 @@ container:{
 flex:1,
 borderRadius:18,
 overflow:"hidden",
-},
-
-surgeButton:{
-position:"absolute",
-top:15,
-right:15,
-backgroundColor:"#fff",
-paddingHorizontal:16,
-paddingVertical:10,
-borderRadius:16,
-
-shadowColor:"#000",
-shadowOpacity:0.15,
-shadowRadius:8,
-shadowOffset:{
-width:0,
-height:4,
-},
-
-elevation:8,
-},
-
-surgeText:{
-fontWeight:"700",
-fontSize:16,
-color:"#111827",
 },
 
 locateButton:{

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { formatMoney } from "../utils/helpers";
 
 import * as Location from "expo-location";
 import * as Notifications from "expo-notifications";
@@ -29,7 +30,6 @@ function DashboardHome({
   profileData,
   location,
   setLocation,
-  surge,
   router,
  incomingOrders,
   weeklyEarnings,
@@ -41,30 +41,7 @@ function DashboardHome({
 }) {
   
 
-  const displayWallet = online
-  ? wallet
-  : {
-      available: 0,
-      pending: 0,
-      today: 0,
-      weekly: 0,
-      monthly: 0,
-      totalEarned: 0,
-    };
-
-const displayRating = online ? rating : 0;
-
-const displayCompletedOrders = online
-  ? completedOrders
-  : 0;
-
-const displayName = online
-  ? profileData.fullName
-  : "Offline";
-
-const displayCity = online
-  ? profileData.city
-  : "--";
+  const displayWallet = wallet;
 
   const handleToggleOnline = async () => {
     if (onlineLoading) return;
@@ -365,11 +342,11 @@ alignItems:"center"
     </Text>
 
     <Text style={styles.cardValue}>
-      €{displayWallet.today}
+      {formatMoney(displayWallet.today)}
     </Text>
 
     <Text style={styles.greenText}>
-      💶 Earnings Today
+      💰 Earnings Today
     </Text>
     </View>
 
@@ -397,7 +374,7 @@ alignItems:"center"
     </Text>
 
     <Text style={styles.cardValue}>
-      €{displayWallet.available}
+      {formatMoney(displayWallet.available)}
     </Text>
 
     <Text style={styles.blueText}>
@@ -426,20 +403,20 @@ alignItems:"center"
 
 <View>
     <Text style={styles.cardLabel}>
-      Rating
+      Deliveries
     </Text>
 
     <Text style={styles.cardValue}>
-      ⭐ {displayRating}
+      {completedOrders || 0}
     </Text>
 
     <Text style={styles.orangeText}>
-      Excellent
+      📦 Completed
     </Text>
     </View>
 
     <Text style={styles.cardIcon}>
-      ⭐
+      📦
     </Text>
     </View>
 
@@ -459,20 +436,20 @@ alignItems:"center"
 
 <View>
     <Text style={styles.cardLabel}>
-      Surge
+      This Week
     </Text>
 
     <Text style={styles.cardValue}>
-      {surge}
+      {formatMoney(displayWallet.weekly)}
     </Text>
 
     <Text style={styles.purpleText}>
-      ⚡ Live Multiplier
+      📅 Earned since Monday
     </Text>
     </View>
 
     <Text style={styles.cardIcon}>
-      ⚡
+      📅
     </Text>
     </View>
 
@@ -501,6 +478,7 @@ alignItems:"center"
       🗺️ Live Delivery Map
     </Text>
 
+    {online && (
     <View
       style={{
         marginLeft: 10,
@@ -520,6 +498,7 @@ alignItems:"center"
         🟢 LIVE
       </Text>
     </View>
+    )}
 
   </View>
 
@@ -564,11 +543,11 @@ alignItems:"center"
 
       <View style={styles.mapStatCard}>
         <Text style={styles.mapStatLabel}>
-          ⚡ Surge
+          💰 Today
         </Text>
 
         <Text style={styles.mapStatValue}>
-          {surge}
+          {formatMoney(displayWallet.today)}
         </Text>
       </View>
 
@@ -578,7 +557,6 @@ alignItems:"center"
 
       <CourierMap
   location={location}
-  surge={surge}
   online={online}
   router={router}
   activeOrder={activeOrder}
@@ -622,23 +600,23 @@ alignItems:"center"
     <View style={styles.performanceGrid}>
 
       <View style={styles.performanceItem}>
-        <Text>💶 Earnings</Text>
+        <Text>💰 Earnings</Text>
         <Text style={styles.performanceValue}>
-          €{displayWallet.today}
+          {formatMoney(displayWallet.today)}
         </Text>
       </View>
 
       <View style={styles.performanceItem}>
         <Text>👛 Wallet</Text>
         <Text style={styles.performanceValue}>
-          €{displayWallet.available}
+          {formatMoney(displayWallet.available)}
         </Text>
       </View>
 
       <View style={styles.performanceItem}>
-        <Text>⭐ Rating</Text>
+        <Text>📦 Deliveries</Text>
         <Text style={styles.performanceValue}>
-          {displayRating}
+          {completedOrders || 0}
         </Text>
       </View>
 
@@ -649,83 +627,6 @@ alignItems:"center"
         </Text>
       </View>
 
-{/* ================= DAILY GOAL ================= */}
-
-<View style={styles.goalCard}>
-
-  <View
-    style={{
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 12,
-    }}
-  >
-
-    <Text style={styles.goalTitle}>
-      🎯 Daily Goal
-    </Text>
-
-    <Text style={styles.goalAmount}>
-      €{displayWallet.today} / €100
-    </Text>
-
-  </View>
-
-  <View style={styles.progressBar}>
-
-    <View
-      style={[
-        styles.progressFill,
-        {
-          width: `${Math.min(
-            (displayWallet.today / 100) * 100,
-            100
-          )}%`,
-        },
-      ]}
-    />
-
-  </View>
-
-</View>
-
-{/* ================= CURRENT SURGE ================= */}
-
-<View style={styles.surgeCard}>
-
-  <View>
-
-    <Text style={styles.surgeTitle}>
-      Current Surge
-    </Text>
-
-    <Text style={styles.surgeValue}>
-      ⚡ {surge}
-    </Text>
-
-  </View>
-
-<TouchableOpacity
-  style={styles.viewButton}
-  onPress={() =>
-    router.push({
-      pathname: "/CourierEarnings",
-      params: {
-        multiplier: surge,
-      },
-    })
-  }
->
-  <Text style={styles.viewButtonText}>
-    View
-  </Text>
-</TouchableOpacity>
-  <Text style={styles.surgeEmoji}>
-    🔥
-  </Text>
-
-</View>
     </View>
 
   </View>
@@ -773,21 +674,21 @@ alignItems:"center"
     <View style={styles.rowItem}>
       <Text>Available</Text>
       <Text style={styles.bold}>
-        €{displayWallet.available}
+        {formatMoney(displayWallet.available)}
       </Text>
     </View>
 
     <View style={styles.rowItem}>
       <Text>Pending</Text>
       <Text style={styles.bold}>
-        €{displayWallet.pending}
+        {formatMoney(displayWallet.pending)}
       </Text>
     </View>
 
     <View style={styles.rowItem}>
       <Text>Today's Earnings</Text>
       <Text style={styles.bold}>
-        €{displayWallet.today}
+        {formatMoney(displayWallet.today)}
       </Text>
     </View>
 
@@ -803,7 +704,7 @@ alignItems:"center"
           },
         ]}
       >
-        €{displayWallet.totalEarned}
+        {formatMoney(displayWallet.totalEarned)}
       </Text>
     </View>
 
@@ -833,16 +734,16 @@ alignItems:"center"
     </View>
 
     <View style={styles.rowItem}>
-      <Text>Rating</Text>
+      <Text>Deliveries</Text>
       <Text style={styles.bold}>
-        ⭐ {displayRating}
+        {completedOrders || 0}
       </Text>
     </View>
 
     <View style={styles.rowItem}>
-      <Text>Current Surge</Text>
+      <Text>This Week</Text>
       <Text style={styles.bold}>
-        {surge}
+        {formatMoney(displayWallet.weekly)}
       </Text>
     </View>
 
@@ -851,7 +752,7 @@ alignItems:"center"
     <View style={styles.rowItem}>
       <Text>Wallet</Text>
       <Text style={styles.bold}>
-        €{displayWallet.available}
+        {formatMoney(displayWallet.available)}
       </Text>
     </View>
 
@@ -1150,71 +1051,16 @@ bold: {
 },
 
 
-goalCard: {
-  marginTop: 20,
-},
 
-goalTitle: {
-  fontSize: 18,
-  fontWeight: "600",
-},
 
-goalAmount: {
-  fontSize: 15,
-  fontWeight: "600",
-},
 
-progressBar: {
-  height: 12,
-  backgroundColor: "#e5e7eb",
-  borderRadius: 20,
-  overflow: "hidden",
-},
 
-progressFill: {
-  height: "100%",
-  backgroundColor: "#f97316",
-},
 
-surgeCard: {
-  marginTop: 28,
-  borderRadius: 22,
-  padding: 24,
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  backgroundColor: "#ff6a00",
-},
 
-surgeTitle: {
-  color: "#fff",
-  fontSize: 16,
-  fontWeight: "500",
-},
 
-surgeValue: {
-  color: "#fff",
-  fontSize: 30,
-  fontWeight: "700",
-  marginTop: 4,
-},
 
-viewButton: {
-  backgroundColor: "#fff",
-  paddingHorizontal: 18,
-  paddingVertical: 10,
-  borderRadius: 14,
-},
 
-viewButtonText: {
-  color: "#f97316",
-  fontWeight: "700",
-  fontSize: 15,
-},
 
-surgeEmoji: {
-  fontSize: 38,
-},
 
 refreshButton: {
   width: 46,

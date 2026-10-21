@@ -219,7 +219,7 @@ return (
 
       <TextInput
         style={styles.input}
-        placeholder="Jeff Martins"
+        placeholder="Full name"
         value={fullName}
         onChangeText={setFullName}
       />

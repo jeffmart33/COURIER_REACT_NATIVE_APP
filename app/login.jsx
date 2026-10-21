@@ -191,11 +191,11 @@ router.replace("/courierdashboard");
 
 <View style={styles.bottomInfo}>
   <Text style={styles.bottomTitle}>
-    Trusted by 3.5+ million courier partners worldwide
+    Deliver with Hooks Food
   </Text>
 
   <Text style={styles.bottomText}>
-    Hooks Food connects courier partners to thousands of daily orders from trusted local restaurants in your city.
+    Hooks Food connects courier partners to orders from trusted local restaurants in your city.
   </Text>
 </View>
 

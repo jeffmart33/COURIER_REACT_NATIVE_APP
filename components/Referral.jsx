@@ -12,10 +12,7 @@ import * as Clipboard from "expo-clipboard";
 
 function Referral({ profileData }) {
   const referralCode =
-    profileData?.referralCode || "CORE-JEFF872";
-
-  const referralBalance =
-    profileData?.referralBalance || 0;
+    profileData?.referralCode || "...";
 
   const referralLink =
     `https://getcoredispatch.cloud/register?ref=${referralCode}`;
@@ -54,7 +51,7 @@ function Referral({ profileData }) {
         </Text>
 
         <Text style={styles.headerText}>
-          Invite other riders and earn referral bonuses for every successful registration.
+          Share your code with other riders who want to join Hooks.
         </Text>
 
       </View>
@@ -81,22 +78,6 @@ function Referral({ profileData }) {
               📋 Copy Code
             </Text>
           </TouchableOpacity>
-
-        </View>
-
-        <View style={styles.greenCard}>
-
-          <Text style={styles.label}>
-            Referral Bonus Balance
-          </Text>
-
-          <Text style={styles.balance}>
-            €{referralBalance}
-          </Text>
-
-          <Text style={styles.small}>
-            Total bonus available
-          </Text>
 
         </View>
 
@@ -165,12 +146,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  greenCard: {
-     backgroundColor: "#ecfdf5",
-    borderRadius: 18,
-    padding: 18,
-    marginTop: 20,
-  },
 
   statCard: {
     backgroundColor: "#fff",
@@ -192,11 +167,6 @@ const styles = StyleSheet.create({
     color: "#ea580c",
   },
 
-  balance: {
-    fontSize: 30,
-    fontWeight: "700",
-    color: "#16a34a",
-  },
 
   stat: {
     fontSize: 28,
@@ -209,10 +179,6 @@ const styles = StyleSheet.create({
     color: "#16a34a",
   },
 
-  small: {
-    marginTop: 10,
-    color: "#6b7280",
-  },
 
   linkBox: {
     backgroundColor: "#f3f4f6",

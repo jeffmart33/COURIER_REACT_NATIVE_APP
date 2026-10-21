@@ -33,7 +33,7 @@ function EditProfileModal({
           vehicle: profileData.vehicle,
           city: profileData.city,
           vehicleRegistration: profileData.vehicleRegistration,
-          governmentId: profileData.governmentId,
+          governmentIdType: profileData.governmentId,
           address: profileData.address,
         },
         {
@@ -132,12 +132,12 @@ function EditProfileModal({
             />
 
             <Text style={styles.label}>
-              Government ID
+              Government ID type
             </Text>
 
             <TextInput
               style={styles.input}
-              placeholder="Government ID"
+              placeholder="For example NIN or Drivers licence"
               placeholderTextColor="#6B7280"
               value={profileData?.governmentId || ""}
               onChangeText={(text) =>

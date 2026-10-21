@@ -137,7 +137,6 @@ useEffect(() => {
       <CourierMap
   location={location}
   online={true}
-  surge="1x"
   router={router}
   activeOrder={activeOrder}
   orderStage={stage}

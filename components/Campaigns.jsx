@@ -191,14 +191,14 @@ function Campaigns() {
                   ]}
                 >
                   {campaign.reached
-                    ? "Completed. Bonus sent to your wallet."
+                    ? "Completed. Hooks adds the bonus to your payout."
                     : "You missed this campaign."}
                 </Text>
               )}
 
               {tab === "current" && campaign.reached && (
                 <Text style={[styles.status, styles.won]}>
-                  Target reached. Bonus is paid when the campaign ends.
+                  Target reached. Hooks adds the bonus to your payout.
                 </Text>
               )}
 

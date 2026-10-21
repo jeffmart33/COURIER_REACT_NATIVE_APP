@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
 } from "react-native";
+import { formatMoney } from "../utils/helpers";
 
 function WalletCard({
   title,
@@ -24,7 +25,7 @@ function WalletCard({
       </Text>
 
       <Text style={styles.amount}>
-        €{amount}
+        {formatMoney(amount)}
       </Text>
     </View>
   );

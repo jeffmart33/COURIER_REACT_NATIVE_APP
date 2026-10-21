@@ -7,6 +7,7 @@ import {
 } from "react-native";
 
 import Profile from "./Profile";
+import { formatMoney } from "../utils/helpers";
 
 function ProfileScreen({
   rating,
@@ -51,7 +52,7 @@ function ProfileScreen({
           </Text>
 
           <Text style={styles.statValue}>
-            €{stats.totalEarnings}
+            {formatMoney(stats.totalEarnings)}
           </Text>
         </View>
 
@@ -61,7 +62,7 @@ function ProfileScreen({
           </Text>
 
           <Text style={styles.statValue}>
-            €{stats.averageFee}
+            {formatMoney(stats.averageFee)}
           </Text>
         </View>
 

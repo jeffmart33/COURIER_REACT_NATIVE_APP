@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
+import { formatMoney } from "../utils/helpers";
 
 function DeliveryHistory({ orders }) {
   if (!orders?.length) {
@@ -39,7 +40,7 @@ function DeliveryHistory({ orders }) {
           </Text>
 
           <Text>
-            💰 €{order.fee}
+            💰 {formatMoney(order.fee)}
           </Text>
 
           <Text style={styles.delivered}>
