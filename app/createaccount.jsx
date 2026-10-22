@@ -13,17 +13,20 @@ import {
 
 import * as ImagePicker from "expo-image-picker";
 import { Dropdown } from "react-native-element-dropdown";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 import API from "../services/api";
+import { finishLogin } from "../services/courierSession";
 import PasswordInput from "../components/PasswordInput";
 import logo from "../assets/images/courierlog.png";
 
 export default function CourierCreateAccount() {
-  const [fullName, setFullName] = useState("");
+  const params = useLocalSearchParams();
+  const googleToken = params.googleToken ? String(params.googleToken) : "";
+  const [fullName, setFullName] = useState(params.fullName ? String(params.fullName) : "");
   const [city, setCity] = useState("");
   const [homeAddress, setHomeAddress] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(params.email ? String(params.email) : "");
   const [phone, setPhone] = useState("");
   const [vehicle, setVehicle] = useState("");
   const [governmentIdType, setGovernmentIdType] = useState("");
@@ -91,7 +94,7 @@ export default function CourierCreateAccount() {
   try {
     if (
       !fullName ||
-      !email ||
+      (!googleToken && !email) ||
       !phone ||
       !city ||
       !homeAddress ||
@@ -101,8 +104,7 @@ export default function CourierCreateAccount() {
       !governmentIdFront ||
       !governmentIdBack ||
       !vehiclePhoto ||
-      !password ||
-      !confirmPassword
+      (!googleToken && (!password || !confirmPassword))
     ) {
       Alert.alert(
         "Missing Information",
@@ -111,7 +113,7 @@ export default function CourierCreateAccount() {
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (!googleToken && password !== confirmPassword) {
       Alert.alert(
         "Password Error",
         "Passwords do not match."
@@ -137,7 +139,11 @@ export default function CourierCreateAccount() {
       "governmentIdType",
       governmentIdType
     );
-    formData.append("password", password);
+    if (googleToken) {
+      formData.append("access_token", googleToken);
+    } else {
+      formData.append("password", password);
+    }
 
     formData.append("governmentIdFront", {
       uri: governmentIdFront.uri,
@@ -156,6 +162,27 @@ export default function CourierCreateAccount() {
       name: "vehicle.jpg",
       type: "image/jpeg",
     });
+
+    if (googleToken) {
+      const response = await API.post(
+        "/api/auth/google/complete",
+        formData,
+        {
+          headers: {
+            "Content-Type":
+              "multipart/form-data",
+          },
+        }
+      );
+
+      Alert.alert(
+        "Account created",
+        "Your account is waiting for approval from the Hooks team."
+      );
+
+      await finishLogin(response.data);
+      return;
+    }
 
     await API.post(
       "/api/auth/register",
@@ -235,6 +262,7 @@ return (
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
+        editable={!googleToken}
       />
 
       <Text style={styles.label}>
@@ -379,6 +407,8 @@ return (
         />
       )}
 
+      {!googleToken && (
+        <>
       <Text style={styles.label}>
         Password
       </Text>
@@ -400,6 +430,8 @@ return (
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
+        </>
+      )}
 
       <TouchableOpacity
         style={styles.createButton}

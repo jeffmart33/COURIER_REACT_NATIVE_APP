@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import API from "../services/api";
-import socket from "../services/socket";
 
 import {
   View,
@@ -17,16 +15,16 @@ import { router } from "expo-router";
 
 import logo from "../assets/images/courierlog.png";
 import { VideoView, useVideoPlayer } from "expo-video";
-import {
-  registerForPushNotifications,
-} from "../services/notifications";
 import courierVideo from "../assets/images/couriervid.mp4";
+import { finishLogin } from "../services/courierSession";
+import { googleAccessToken } from "../services/googleSignIn";
 import PasswordInput from "../components/PasswordInput";
 
 export default function Login() {
 const [email, setEmail] = useState("");
 const [password, setPassword] = useState("");
 const [loading, setLoading] = useState(false);
+const [googleLoading, setGoogleLoading] = useState(false);
   const player = useVideoPlayer(courierVideo, (player) => {
   player.loop = true;
   player.muted = true;
@@ -50,42 +48,9 @@ const handleSignIn = async () => {
     });
     console.log(response.data);
 
-    const token = response.data.token;
+    alert("Login Successful");
 
-await AsyncStorage.setItem(
-  "courierToken",
-  token
-);
-
-await AsyncStorage.setItem(
-  "courierUser",
-  JSON.stringify(response.data.courier)
-);
-
-await AsyncStorage.setItem(
-  "courierId",
-  response.data.courier.id
-);
-
-// Register push token AFTER everything is saved
-await registerForPushNotifications(token);
-
-
-
-// Connect Socket
-if (!socket.connected) {
-  socket.connect();
-}
-
-// Register this courier with the backend
-socket.emit(
-  "register-courier",
-  response.data.courier.id
-);
-
-alert("Login Successful");
-
-router.replace("/courierdashboard");
+    await finishLogin(response.data);
   } catch (error) {
     alert(
       error.response?.data?.message ||
@@ -93,6 +58,44 @@ router.replace("/courierdashboard");
     );
   } finally {
     setLoading(false);
+  }
+};
+
+const handleGoogle = async () => {
+  if (googleLoading) return;
+
+  try {
+    setGoogleLoading(true);
+
+    const accessToken = await googleAccessToken();
+
+    if (!accessToken) return;
+
+    const response = await API.post("/api/auth/google", {
+      access_token: accessToken,
+    });
+
+    if (response.data.needsProfile) {
+      router.push({
+        pathname: "/createaccount",
+        params: {
+          googleToken: accessToken,
+          email: response.data.email,
+          fullName: response.data.fullName || "",
+        },
+      });
+      return;
+    }
+
+    await finishLogin(response.data);
+  } catch (error) {
+    alert(
+      error.response?.data?.message ||
+      error.message ||
+      "Google sign in failed"
+    );
+  } finally {
+    setGoogleLoading(false);
   }
 };
 
@@ -155,6 +158,16 @@ router.replace("/courierdashboard");
 >
   <Text style={styles.signInText}>
     {loading ? "Signing In..." : "Sign In"}
+  </Text>
+</TouchableOpacity>
+
+        <TouchableOpacity
+  style={styles.googleButton}
+  disabled={googleLoading}
+  onPress={handleGoogle}
+>
+  <Text style={styles.googleText}>
+    {googleLoading ? "Opening Google..." : "Continue with Google"}
   </Text>
 </TouchableOpacity>
 
@@ -281,6 +294,20 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginTop: 10,
+  },
+
+  googleButton: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 10,
+  },
+
+  googleText: {
+    color: "#111827",
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 17,
   },
 
   signInText: {
