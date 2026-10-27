@@ -1,11 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import {
+  Alert,
   View,
   Text,
   TouchableOpacity,
   Image,
+  Linking,
   StyleSheet,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import API from "../services/api";
+
+const PRIVACY_URL = "https://hooksfoodapp.com/privacy-policy";
 
 import courierLogo from "../assets/images/courierlog.png";
 
@@ -17,6 +24,38 @@ function Profile({
   setShowEditModal,
   handleLogout,
 }) {
+
+  const [deleting, setDeleting] = useState(false);
+
+  const deleteAccount = async () => {
+    setDeleting(true);
+
+    try {
+      const token = await AsyncStorage.getItem("courierToken");
+
+      await API.delete("/api/profile/account", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      Alert.alert("Account deleted", "Your courier account and personal details have been deleted.");
+
+      await handleLogout();
+    } catch (error) {
+      Alert.alert("Could not delete the account", error?.response?.data?.message || "Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const confirmDelete = () =>
+    Alert.alert(
+      "Delete your account?",
+      "Your name, contacts, bank details and ID photos will be deleted and you will be logged out. Past deliveries stay in Hooks records. This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: deleteAccount },
+      ]
+    );
 
   const displayCompleted = completed || 0;
 
@@ -181,6 +220,27 @@ Referral Code
         </Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        accessibilityRole="link"
+        style={styles.linkButton}
+        onPress={() => Linking.openURL(PRIVACY_URL)}
+      >
+        <Text style={styles.linkText}>
+          Privacy policy
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        accessibilityRole="button"
+        disabled={deleting}
+        style={styles.deleteButton}
+        onPress={confirmDelete}
+      >
+        <Text style={styles.deleteText}>
+          {deleting ? "Deleting..." : "Delete my account"}
+        </Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
@@ -330,6 +390,33 @@ const styles = StyleSheet.create({
     },
 
     elevation: 3,
+  },
+
+  linkButton: {
+    paddingVertical: 14,
+    marginTop: 8,
+  },
+
+  linkText: {
+    color: "#F97316",
+    textAlign: "center",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  deleteButton: {
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#DC2626",
+    marginBottom: 8,
+  },
+
+  deleteText: {
+    color: "#DC2626",
+    textAlign: "center",
+    fontSize: 15,
+    fontWeight: "600",
   },
 
   buttonText: {
