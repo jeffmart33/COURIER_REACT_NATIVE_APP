@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 
 import API from "../services/api";
+import { stopBackgroundLocation } from "../services/backgroundLocation";
 import socket from "../services/socket";
 
 export default function useAuth({
@@ -43,6 +44,8 @@ export default function useAuth({
     }
 
     setOnline(false);
+
+    await stopBackgroundLocation();
 
     await AsyncStorage.multiRemove([
       "courierToken",

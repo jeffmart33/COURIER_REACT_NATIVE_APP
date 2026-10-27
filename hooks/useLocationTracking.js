@@ -5,6 +5,7 @@ import {
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API from "../services/api";
+import { startBackgroundLocation, stopBackgroundLocation } from "../services/backgroundLocation";
 
 
 
@@ -59,6 +60,11 @@ export default function useLocationTracking({
   useEffect(() => {
     arrivalUpdatingRef.current = false;
   }, [orderStage, activeOrder?._id]);
+
+  useEffect(() => {
+    if (online || hasActiveOrder) startBackgroundLocation();
+    else stopBackgroundLocation();
+  }, [online, hasActiveOrder]);
 
   useEffect(() => {
     if (!online && !hasActiveOrder) return;
