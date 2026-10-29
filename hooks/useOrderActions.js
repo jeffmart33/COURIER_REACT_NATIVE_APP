@@ -51,7 +51,7 @@ const isWithinRadius = (target, radius = 100) => {
   );
 };
 
-  const nextStage = async () => {
+  const nextStage = async (deliveryCode) => {
   if (!activeOrder) return;
 
 const flow = [
@@ -232,6 +232,7 @@ const statusMap = {
       `/api/orders/${activeOrder._id}/status`,
       {
         status: statusMap[next],
+        ...(next === "Delivered" && deliveryCode ? { deliveryCode } : {}),
       },
       {
         headers: {

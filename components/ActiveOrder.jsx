@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  TextInput,
 } from "react-native";
 
 import NavigationAppModal from "./NavigationAppModal";
@@ -16,6 +17,7 @@ function ActiveOrder({
   stage,
   onNext,
 }) {
+  const [deliveryCode, setDeliveryCode] = useState("");
 
 
   const [showNavigationModal, setShowNavigationModal] = useState(false);
@@ -244,11 +246,24 @@ return (
 
         ))}
 
+        {stage === "Arrived at Customer Address" && (
+          <TextInput
+            value={deliveryCode}
+            onChangeText={(value) => setDeliveryCode(value.replace(/\D/g, "").slice(0, 4))}
+            placeholder="Delivery code from the customer"
+            placeholderTextColor="#94a3b8"
+            keyboardType="number-pad"
+            maxLength={4}
+            accessibilityLabel="Delivery code"
+            style={styles.codeInput}
+          />
+        )}
+
         {stage !== "Delivered" ? (
 
           <TouchableOpacity
             style={styles.button}
-            onPress={onNext}
+            onPress={() => onNext(stage === "Arrived at Customer Address" ? deliveryCode : undefined)}
           >
 
             <Text style={styles.buttonText}>
@@ -374,6 +389,18 @@ const styles = StyleSheet.create({
   buttonText:{
     color:"#fff",
     fontWeight:"700",
+  },
+
+  codeInput:{
+    marginTop:20,
+    borderWidth:1,
+    borderColor:"#cbd5e1",
+    borderRadius:10,
+    padding:12,
+    fontSize:20,
+    letterSpacing:6,
+    textAlign:"center",
+    color:"#0f172a",
   },
 
   done:{
