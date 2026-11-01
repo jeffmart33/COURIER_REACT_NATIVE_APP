@@ -25,8 +25,8 @@ export default function CourierResetCode() {
 
   const handleSubmit = async () => {
     try {
-      if (code.length !== 4) {
-        setError("Please enter the 4-digit code");
+      if (![4, 6].includes(code.length)) {
+        setError("Please enter the full code");
         return;
       }
 
@@ -81,7 +81,7 @@ export default function CourierResetCode() {
           </Text>
 
           <Text style={styles.subtitle}>
-            Enter the 4-digit reset code sent to your email
+            Enter the reset code sent to your email
           </Text>
 
           <TextInput
@@ -89,7 +89,7 @@ export default function CourierResetCode() {
             placeholder="••••"
             placeholderTextColor="#999"
             keyboardType="number-pad"
-            maxLength={4}
+            maxLength={6}
             value={code}
             onChangeText={(text) => {
               setCode(text.replace(/\D/g, ""));

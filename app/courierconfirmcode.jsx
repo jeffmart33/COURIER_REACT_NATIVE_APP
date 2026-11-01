@@ -68,9 +68,9 @@ const handleResend = async () => {
 
 const handleVerify = async () => {
   try {
-    if (code.length !== 4) {
+    if (![4, 6].includes(code.length)) {
       setError(
-        "Please enter the 4-digit code"
+        "Please enter the full code"
       );
       return;
     }
@@ -139,7 +139,7 @@ return (
         </Text>
 
         <Text style={styles.subtitle}>
-          Enter the 4-digit verification code sent to your email
+          Enter the verification code sent to your email
         </Text>
 
         <TextInput
@@ -147,7 +147,7 @@ return (
           placeholder="••••"
           placeholderTextColor="#999"
           keyboardType="number-pad"
-          maxLength={4}
+          maxLength={6}
           value={code}
           onChangeText={(text) => {
             setCode(
