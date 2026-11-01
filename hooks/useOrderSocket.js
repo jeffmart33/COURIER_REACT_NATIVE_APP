@@ -1,3 +1,4 @@
+import { stageOf } from "../utils/orderStage";
 import { useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
@@ -151,6 +152,10 @@ export default function useOrderSocket({
           ? order
           : current
       );
+
+      if (sameId(activeOrderRef.current?._id, order?._id) && stageOf(order?.status)) {
+        setOrderStage(stageOf(order.status));
+      }
     };
 
     socket.on("order-cancelled", handleCancelled);

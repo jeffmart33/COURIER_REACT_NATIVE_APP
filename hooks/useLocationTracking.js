@@ -6,6 +6,7 @@ import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API from "../services/api";
 import { startBackgroundLocation, stopBackgroundLocation } from "../services/backgroundLocation";
+import { askForegroundLocation } from "../services/locationConsent";
 
 
 
@@ -74,7 +75,7 @@ export default function useLocationTracking({
     const startTracking = async () => {
       try {
         const { status } =
-          await Location.requestForegroundPermissionsAsync();
+          await askForegroundLocation();
 
         if (status !== "granted") {
           console.log("Location permission denied");

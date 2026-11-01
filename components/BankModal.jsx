@@ -39,6 +39,13 @@ function BankModal({
       return;
     }
 
+    if (!/^\d{10}$/.test(String(accountNumber).trim())) {
+      Alert.alert(
+        "The account number must be 10 digits."
+      );
+      return;
+    }
+
     try {
 
       const token =

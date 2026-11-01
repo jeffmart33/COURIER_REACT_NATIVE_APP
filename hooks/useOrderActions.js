@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 import API from "../services/api";
+import { stageOf } from "../utils/orderStage";
 
 export default function useOrderActions({
   activeOrder,
@@ -50,6 +51,27 @@ const isWithinRadius = (target, radius = 100) => {
       ) <= radius
   );
 };
+
+  const refreshStage = async () => {
+    try {
+      const token = await AsyncStorage.getItem("courierToken");
+
+      const { data } = await API.get("/api/orders/active", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const current = stageOf(data?.status);
+
+      if (!data?._id || !current || current === orderStage) return false;
+
+      setActiveOrder(data);
+      setOrderStage(current);
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
 
   const nextStage = async (deliveryCode) => {
   if (!activeOrder) return;
@@ -241,13 +263,15 @@ const statusMap = {
       }
     );
 
-    /*
-     * Only change the local stage AFTER
-     * the backend successfully accepts it.
-     */
-    setOrderStage(next);
+    const saved = response.data?.order;
 
-    if (next === "Delivered") {
+    const reached = stageOf(saved?.status) || next;
+
+    setOrderStage(reached);
+
+    if (saved) setActiveOrder(saved);
+
+    if (reached === "Delivered") {
       setActiveOrder(null);
       setOrderStage("Assigned");
       setActiveTab("Home");
@@ -259,6 +283,10 @@ const statusMap = {
       "Status update failed",
       error
     );
+
+    const moved = await refreshStage();
+
+    if (moved) return;
 
     Alert.alert(
       "Unable to update delivery",
@@ -287,7 +315,7 @@ const statusMap = {
 
       setActiveOrder(data.order);
 
-      setOrderStage("Assigned");
+      setOrderStage(stageOf(data.order?.status) || "Assigned");
 
       setActiveTab("Orders");
 

@@ -7,6 +7,15 @@ import {
 } from "react-native";
 import { formatMoney } from "../utils/helpers";
 
+export const WITHDRAWAL_STATUS = {
+  pending: ["Waiting for approval", "#b45309"],
+  approved: ["Approved, sending soon", "#2563eb"],
+  processing: ["Sending to your bank", "#2563eb"],
+  successful: ["Paid to your bank", "#16a34a"],
+  failed: ["Payment failed, money returned", "#dc2626"],
+  rejected: ["Rejected, money returned", "#dc2626"],
+};
+
 function TransactionHistory({
   transactions,
 }) {
@@ -50,9 +59,22 @@ function TransactionHistory({
           {formatMoney(item.amount)}
         </Text>
 
-        <Text style={styles.status}>
-          {item.status}
+        <Text
+          style={[
+            styles.status,
+            WITHDRAWAL_STATUS[item.withdrawalStatus]
+              ? { color: WITHDRAWAL_STATUS[item.withdrawalStatus][1] }
+              : null,
+          ]}
+        >
+          {WITHDRAWAL_STATUS[item.withdrawalStatus]?.[0] || item.status}
         </Text>
+
+        {item.withdrawalReason ? (
+          <Text style={styles.reason}>
+            {item.withdrawalReason}
+          </Text>
+        ) : null}
 
       </View>
 
@@ -129,6 +151,14 @@ const styles = StyleSheet.create({
   status: {
     marginTop: 4,
     color: "#2563eb",
+  },
+
+  reason: {
+    marginTop: 2,
+    color: "#6b7280",
+    fontSize: 12,
+    maxWidth: 180,
+    textAlign: "right",
   },
 
   emptyContainer: {

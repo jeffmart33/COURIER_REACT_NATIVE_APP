@@ -1,3 +1,4 @@
+import { askForegroundLocation } from "../services/locationConsent";
 import { useLocalSearchParams } from "expo-router";
 import React, {
   useEffect,
@@ -59,7 +60,7 @@ useEffect(() => {
   (async () => {
 
     const { status } =
-      await Location.requestForegroundPermissionsAsync();
+      await askForegroundLocation();
 
     if (status !== "granted") return;
 

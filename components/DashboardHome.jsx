@@ -1,3 +1,4 @@
+import { askForegroundLocation } from "../services/locationConsent";
 import React from "react";
 
 import {
@@ -69,7 +70,7 @@ function DashboardHome({
         const {
           status: locationStatus,
         } =
-          await Location.requestForegroundPermissionsAsync();
+          await askForegroundLocation();
 
         if (locationStatus !== "granted") {
 

@@ -16,13 +16,30 @@ import { Dropdown } from "react-native-element-dropdown";
 import { router, useLocalSearchParams } from "expo-router";
 
 import API from "../services/api";
-import { finishLogin } from "../services/courierSession";
+import { continueWithGoogle, finishLogin } from "../services/courierSession";
 import PasswordInput from "../components/PasswordInput";
 import logo from "../assets/images/courierlog.png";
 
 export default function CourierCreateAccount() {
   const params = useLocalSearchParams();
   const googleToken = params.googleToken ? String(params.googleToken) : "";
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const handleGoogle = async () => {
+    if (googleLoading) return;
+
+    try {
+      setGoogleLoading(true);
+      await continueWithGoogle(router.replace);
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+        error.message ||
+        "Google sign in failed"
+      );
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
   const [fullName, setFullName] = useState(params.fullName ? String(params.fullName) : "");
   const [city, setCity] = useState("");
   const [homeAddress, setHomeAddress] = useState("");
@@ -237,6 +254,18 @@ return (
       <Text style={styles.subtitle}>
         Create your rider account to start delivering
       </Text>
+
+      {!googleToken && (
+        <TouchableOpacity
+          style={styles.googleButton}
+          disabled={googleLoading}
+          onPress={handleGoogle}
+        >
+          <Text style={styles.googleText}>
+            {googleLoading ? "Opening Google..." : "Sign up with Google"}
+          </Text>
+        </TouchableOpacity>
+      )}
 
      
 
@@ -460,6 +489,19 @@ return (
 
 }
 const styles = StyleSheet.create({
+  googleButton: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    backgroundColor: "#fff",
+    marginBottom: 16,
+  },
+  googleText: {
+    fontWeight: "700",
+    color: "#111827",
+  },
   container: {
     flex: 1,
     backgroundColor: "#f97316",

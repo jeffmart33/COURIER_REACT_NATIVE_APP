@@ -210,7 +210,7 @@ return (
         )}
 
         <Text style={styles.fee}>
-          💰 {currency}{Number(order.fee || 0).toLocaleString()}
+          💰 {Number(order.fee) > 0 ? `${currency}${Number(order.fee).toLocaleString()}` : "Delivery fee not set for this order"}
         </Text>
 
       </View>

@@ -10,6 +10,7 @@ import {
 
 import WalletCard from "./WalletCard";
 import BankModal from "./BankModal";
+import { WITHDRAWAL_STATUS } from "./TransactionHistory";
 import { formatMoney } from "../utils/helpers";
 
 function Wallet({
@@ -27,6 +28,8 @@ function Wallet({
   accountNumber,
   setAccountNumber,
 }) {
+  const latestRequest = (transactions || []).find((row) => row.type === "withdrawal");
+
   return (
 <ScrollView
   contentContainerStyle={{
@@ -72,6 +75,27 @@ function Wallet({
 
 
       {/* Withdraw */}
+
+      {latestRequest && WITHDRAWAL_STATUS[latestRequest.withdrawalStatus] && (
+        <View style={styles.requestCard} testID="withdrawal-request">
+          <Text style={styles.requestTitle}>
+            Your last withdrawal: {formatMoney(latestRequest.amount)}
+          </Text>
+          <Text
+            style={[
+              styles.requestStatus,
+              { color: WITHDRAWAL_STATUS[latestRequest.withdrawalStatus][1] },
+            ]}
+          >
+            {WITHDRAWAL_STATUS[latestRequest.withdrawalStatus][0]}
+          </Text>
+          {latestRequest.withdrawalReason ? (
+            <Text style={styles.requestReason}>
+              {latestRequest.withdrawalReason}
+            </Text>
+          ) : null}
+        </View>
+      )}
 
       <View style={styles.card}>
 
@@ -204,6 +228,31 @@ const styles = StyleSheet.create({
   description: {
     color: "#666",
     marginBottom: 16,
+  },
+
+  requestCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: "#F97316",
+  },
+
+  requestTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  requestStatus: {
+    marginTop: 4,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+
+  requestReason: {
+    marginTop: 4,
+    color: "#6b7280",
   },
 
   withdrawButton: {

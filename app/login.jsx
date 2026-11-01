@@ -16,8 +16,7 @@ import { router } from "expo-router";
 import logo from "../assets/images/courierlog.png";
 import { VideoView, useVideoPlayer } from "expo-video";
 import courierVideo from "../assets/images/couriervid.mp4";
-import { finishLogin } from "../services/courierSession";
-import { googleAccessToken } from "../services/googleSignIn";
+import { finishLogin, continueWithGoogle } from "../services/courierSession";
 import PasswordInput from "../components/PasswordInput";
 
 export default function Login() {
@@ -67,27 +66,7 @@ const handleGoogle = async () => {
   try {
     setGoogleLoading(true);
 
-    const accessToken = await googleAccessToken();
-
-    if (!accessToken) return;
-
-    const response = await API.post("/api/auth/google", {
-      access_token: accessToken,
-    });
-
-    if (response.data.needsProfile) {
-      router.push({
-        pathname: "/createaccount",
-        params: {
-          googleToken: accessToken,
-          email: response.data.email,
-          fullName: response.data.fullName || "",
-        },
-      });
-      return;
-    }
-
-    await finishLogin(response.data);
+    await continueWithGoogle();
   } catch (error) {
     alert(
       error.response?.data?.message ||
